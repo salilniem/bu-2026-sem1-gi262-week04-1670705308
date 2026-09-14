@@ -27,6 +27,7 @@ namespace Solution
         public GameObject[] demonWallsPrefab;
         public GameObject[] itemsPrefab;
         public GameObject[] collectItemsPrefab;
+        public GameObject[] zombiePrefab;
 
         [Header("Set Transform")]
         public Transform floorParent;
@@ -37,6 +38,7 @@ namespace Solution
         public int obsatcleCount;
         public int itemPotionCount;
         public int colloctItemCount;
+        public int zombieCount;
 
         public Identity[,] mapdata;
 
@@ -98,7 +100,7 @@ namespace Solution
                 int y = Random.Range(0, Y);
                 if (mapdata[x, y] == null)
                 {
-                    PlaceItem(x, y,demonWallsPrefab,wallParent,demonWall);
+                    PlaceItem(x, y, demonWallsPrefab, wallParent);
                     count++;
                 }
             }
@@ -112,7 +114,7 @@ namespace Solution
                 int y = Random.Range(0, Y);
                 if (mapdata[x, y] == null)
                 {
-                    PlaceItem(x, y,itemsPrefab, itemParent, potion);
+                    PlaceItem(x, y, itemsPrefab, itemParent);
                     count++;
                 }
             }
@@ -125,7 +127,23 @@ namespace Solution
                 int y = Random.Range(0, Y);
                 if (mapdata[x, y] == null)
                 {
-                    PlaceItem(x, y,collectItemsPrefab, itemParent,collectItem);
+                    PlaceItem(x, y, collectItemsPrefab, itemParent);
+                    count++;
+                }
+            }
+            count = 0;
+            preventInfiniteLoop = 100;
+
+            while (count < zombieCount)
+            {
+                if (--preventInfiniteLoop < 0) break;
+
+                int x = Random.Range(0, X);
+                int y = Random.Range(0, Y);
+
+                if (mapdata[x, y] == null)
+                {
+                    PlaceItem(x, y, zombiePrefab, itemParent);
                     count++;
                 }
             }
@@ -142,21 +160,26 @@ namespace Solution
             return mapdata[(int)x, (int)y];
         }
 
-        public void PlaceItem(int x, int y,GameObject[] _itemsPrefab,Transform parrent,string _name)
+        public void PlaceItem(int x, int y, GameObject[] _itemsPrefab, Transform parent)
         {
             int r = Random.Range(0, _itemsPrefab.Length);
-            GameObject obj = Instantiate(_itemsPrefab[r], new Vector3(x, y, 0), Quaternion.identity);
-            obj.transform.parent = parrent;
+
+            GameObject obj = Instantiate(
+                _itemsPrefab[r],
+                new Vector3(x, y, 0),
+                Quaternion.identity
+            );
+
+            obj.transform.parent = parent;
+
             mapdata[x, y] = obj.GetComponent<Identity>();
+
             mapdata[x, y].positionX = x;
             mapdata[x, y].positionY = y;
             mapdata[x, y].mapGenerator = this;
-            if (_name != collectItem) {
-                mapdata[x, y].Name = _name;
-            }
             obj.name = $"Item_{mapdata[x, y].Name} {x}, {y}";
         }
 
-       
+
     }
 }
